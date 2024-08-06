@@ -1,0 +1,46 @@
+services:
+    nginx:
+        image: laravel-eleven/nginx:latest
+        container_name: nginx-laravel-eleven
+        build: infrastructure/nginx
+        ports:
+            - 8000:80
+        volumes:
+            - .:/var/www
+        depends_on:
+            - php
+        networks:
+            - laravel-eleven
+    php:
+        image: laravel-eleven/php:8.3-fpm
+        container_name: php-laravel-eleven
+        build: infrastructure/php
+        user: "1000"
+        ports:
+            - 9000:9000
+        volumes:
+            - .:/var/www
+        networks:
+            - laravel-eleven
+    db:
+        image: postgres:15
+        container_name: db-laravel-eleven
+        restart: unless-stopped
+        user: "1000"
+        environment:
+          POSTGRES_DB: laravel_eleven
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: 123456
+        volumes:
+            - ./.database/postgresql:/var/lib/postgresql/data
+        depends_on:
+            - php
+        ports:
+            - "5433:5432"
+        expose:
+            - "5433"
+        networks:
+            - laravel-eleven
+networks:
+    laravel-eleven:
+        driver: bridge
